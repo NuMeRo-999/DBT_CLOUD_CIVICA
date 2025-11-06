@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: products
+  - name: stg_server_dbo__products
     config:
       contract:
         enforced: true
