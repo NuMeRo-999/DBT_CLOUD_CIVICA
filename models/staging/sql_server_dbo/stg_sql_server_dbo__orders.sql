@@ -1,3 +1,10 @@
+{{
+    config(
+        +materialized: 'incremental'
+    )
+        
+}}
+
 WITH source AS (
 
     SELECT * FROM {{ source('sql_server_dbo', 'orders') }}
