@@ -1,0 +1,245 @@
+version: 2
+
+sources:
+  - name: sql_server_dbo
+    schema: sql_server_dbo
+    database: alumno27_dev_bronze_db
+
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+
+    tables:
+      - name: addresses
+        loaded_at_field: _fivetran_synced
+        columns:
+          - name: address_id
+            tests:
+              - not_null
+              - unique
+          - name: zipcode
+            tests:
+              - not_null
+          - name: country
+            tests:
+              - not_null
+          - name: address
+            tests:
+              - not_null
+          - name: state
+            tests: []                # opcional
+          - name: _fivetran_deleted
+            tests: []
+          - name: _fivetran_synced
+            tests:
+              - not_null
+
+      - name: events
+        loaded_at_field: _fivetran_synced
+        columns:
+          - name: event_id
+            tests:
+              - not_null
+              - unique
+          - name: page_url
+            tests: []               # puede ser nulo en algunos eventos
+          - name: event_type
+            tests:
+              - not_null
+          - name: user_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('sql_server_dbo', 'users')
+                  field: user_id
+          - name: product_id
+            tests:
+              - relationships:
+                  to: source('sql_server_dbo', 'products')
+                  field: product_id
+          - name: session_id
+            tests: []
+          - name: created_at
+            tests:
+              - not_null
+          - name: order_id
+            tests: []
+          - name: _fivetran_deleted
+            tests: []
+          - name: _fivetran_synced
+            tests:
+              - not_null
+
+      - name: products
+        loaded_at_field: _fivetran_synced
+        columns:
+          - name: product_id
+            tests:
+              - not_null
+              - unique
+          - name: price
+            tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "price >= 0"
+          - name: name
+            tests:
+              - not_null
+          - name: inventory
+            tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "inventory >= 0"
+          - name: _fivetran_deleted
+            tests: []
+          - name: _fivetran_synced
+            tests:
+              - not_null
+
+      - name: orders
+        loaded_at_field: _fivetran_synced
+        columns:
+          - name: order_id
+            tests:
+              - not_null
+              - unique
+          - name: shipping_service
+            tests:
+              - not null
+          - name: shipping_cost
+            tests:
+              - positives_values:
+                  name: "positive_price_test"
+                  
+          - name: address_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('sql_server_dbo', 'addresses')
+                  field: address_id
+          - name: created_at
+            tests:
+              - not_null
+          - name: promo_id
+            tests:
+              - relationships:
+                  to: source('sql_server_dbo', 'promos')
+                  field: promo_id
+          - name: estimated_delivery_at
+            tests: []
+          - name: order_cost
+            tests:
+              - dbt_utils.expression_is_true:
+                  expression: "order_cost >= 0"
+          - name: user_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('sql_server_dbo', 'users')
+                  field: user_id
+          - name: order_total
+            tests:
+              - dbt_utils.expression_is_true:
+                  expression: "order_total >= 0"
+          - name: delivered_at
+            tests: []
+          - name: tracking_id
+            tests: []
+          - name: status
+            tests:
+              - not_null
+          - name: _fivetran_deleted
+            tests: []
+          - name: _fivetran_synced
+            tests:
+              - not_null
+
+      - name: order_items
+        loaded_at_field: _fivetran_synced
+        columns:
+          - name: order_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('sql_server_dbo', 'orders')
+                  field: order_id
+          - name: product_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('sql_server_dbo', 'products')
+                  field: product_id
+          - name: quantity
+            tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "quantity >= 0"
+          - name: _fivetran_deleted
+            tests: []
+          - name: _fivetran_synced
+            tests:
+              - not_null
+
+      - name: promos
+        loaded_at_field: _fivetran_synced
+        columns:
+          - name: promo_id
+            tests:
+              - not_null
+              - unique
+          - name: discount
+            tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "discount >= 0"
+          - name: status
+            tests:
+              - not_null
+          - name: _fivetran_deleted
+            tests: []
+          - name: _fivetran_synced
+            tests:
+              - not_null
+
+      - name: users
+        loaded_at_field: _fivetran_synced
+        columns:
+          - name: user_id
+            tests:
+              - not_null
+              - unique
+          - name: updated_at
+            tests:
+              - not_null
+          - name: address_id
+            tests:
+              - relationships:
+                  to: source('sql_server_dbo', 'addresses')
+                  field: address_id
+          - name: last_name
+            tests: []
+          - name: created_at
+            tests:
+              - not_null
+          - name: phone_number
+            tests: []
+          - name: total_orders
+            tests:
+              - dbt_utils.expression_is_true:
+                  expression: "total_orders >= 0"
+          - name: first_name
+            tests:
+              - not_null
+          - name: email
+            tests:
+              - not_null
+          - name: _fivetran_deleted
+            tests: []
+          - name: _fivetran_synced
+            tests:
+              - not_null
