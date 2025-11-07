@@ -41,3 +41,7 @@ models:
         description: >
           Date that the data was loaded.
    
+  - name: base_server_dbo__addresses
+    columns:
+      name: address_id
+      data-type: TEXT

@@ -39,6 +39,13 @@ sources:
             tests:
               - not_null
 
+      - name: countries
+        columns:
+          - name: countries_id
+          - name: zipcode
+          - name: country
+          - name: state
+
       - name: events
         loaded_at_field: _fivetran_synced
         columns:

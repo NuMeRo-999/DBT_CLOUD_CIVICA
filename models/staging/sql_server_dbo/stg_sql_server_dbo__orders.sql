@@ -1,9 +1,8 @@
-{{
-    config(
-        +materialized: 'incremental'
-    )
-        
-}}
+{{ config(
+    materialized='incremental',
+    unique_key = '_row'
+    ) 
+    }}
 
 WITH source AS (
 
@@ -11,11 +10,15 @@ WITH source AS (
 
 ),
 
+{% if is_incremental() %}
+    WHERE _fivetran_synced > (SELECT MAX(_fivetran_synced) FROM {{ this }} )
+{% endif %}
+
 renamed AS (
 
     SELECT
         order_id,
-        shipping_service,
+        shipping_service, -- normalizar
         shipping_cost AS dollars_shipping_cost,
         address_id,
         created_at,
@@ -33,19 +36,3 @@ renamed AS (
 )
 
 SELECT * FROM renamed
-
-SELECT *
-FROM {{ source('sql_server_dbo', 'orders') }}
-
-WHERE estimated_delivery_at IS NULL
-
-SELECT * FROM ORDERS_ITEMS
-
-SELECT *, C.name
-FROM {{ source('sql_server_dbo', 'orders') }} A
-    LEFT JOIN {{ source('sql_server_dbo', 'order_items') }} B
-        ON A.order_id = B.order_id
-    LEFT JOIN {{ source('sql_server_dbo', 'products') }} C
-        ON B.product_id = C.product_id
-
-WHERE A.estimated_delivery_at IS NULL

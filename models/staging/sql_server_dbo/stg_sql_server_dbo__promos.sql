@@ -26,7 +26,4 @@ renamed_casted AS (
     CONVERT_TIMEZONE('UTC', current_date()) AS date_load
 )
 
-SELECT * FROM renamed_casted
-
--- normalizar shipping_service en orders
--- 
+SELECT * FROM renamed_casted 
