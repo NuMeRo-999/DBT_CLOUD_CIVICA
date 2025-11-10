@@ -1,10 +1,10 @@
 
 with
-    src_addresses as (select zipcode, country, state from {{ ref("sql_server_dbo", "addresses") }}),
+    src_addresses as (select zipcode, country, state from {{ ref("base_sql_server_dbo__addresses") }}),
 
     renamed_casted as (
         select
-            MD5(CONCAT(zipcode,country,state)) AS countries_id,
+            MD5(CONCAT(zipcode,country,state)) AS zipcode_id,
             zipcode,
             country,
             state,
