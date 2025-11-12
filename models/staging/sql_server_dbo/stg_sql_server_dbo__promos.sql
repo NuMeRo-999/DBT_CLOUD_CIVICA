@@ -9,10 +9,10 @@ renamed_casted AS (
         MD5(LOWER(REPLACE(REPLACE(promo_id, ' ', '_'), '-', '_'))) AS promo_id,
         LOWER(REPLACE(REPLACE(promo_id, ' ', '_'), '-', '_')) AS promo_name,
         discount AS dollars_discount,
-        CASE 
+        (CASE 
             WHEN status = 'active' THEN TRUE
             ELSE FALSE
-        END AS IsActive,
+        END)::BOOLEAN AS IsActive,
         CONVERT_TIMEZONE('UTC', _fivetran_synced) AS date_load
     FROM src_promos
 
@@ -26,7 +26,4 @@ renamed_casted AS (
     CONVERT_TIMEZONE('UTC', current_date()) AS date_load
 )
 
-SELECT * FROM renamed_casted
-
--- normalizar shipping_service en orders
--- 
+SELECT * FROM renamed_casted 
