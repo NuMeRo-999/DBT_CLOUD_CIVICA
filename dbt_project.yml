@@ -37,10 +37,11 @@ models:
     # Applies to all files under models/staging/
     staging:
       +materialized: view
+      +database: "{{ env_var('DBT_ENVIRONMENTS') }}_SILVER_DB"
     # Applies to all files under models/marts/      
-    +meta:
-      marts:
-        +materialized: table
+    marts:
+      +materialized: table
+      +database: "{{ env_var('DBT_ENVIRONMENTS') }}_GOLD_DB"
 
 
 seeds:
